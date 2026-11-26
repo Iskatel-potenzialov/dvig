@@ -1,0 +1,25 @@
+const assert = require('node:assert/strict')
+const {test} = require('node:test')
+const {buildSync} = require('esbuild')
+const Module = require('node:module')
+const path = require('node:path')
+const values = new Map()
+global.localStorage = {getItem: k => values.get(k) ?? null, setItem: (k,v) => values.set(k,v)}
+const result = buildSync({entryPoints:[path.join(__dirname,'../src/data.ts')],bundle:true,platform:'node',format:'cjs',write:false})
+const mod = new Module('demo');mod.filename=path.join(__dirname,'demo-bundle.cjs');mod.paths=module.paths;mod._compile(result.outputFiles[0].text,mod.filename)
+const {demo}=mod.exports
+test('one persisted chat and draft per vehicle',()=>{
+  assert.equal(demo.vehicles.length,50)
+  const [a,b]=demo.vehicles;const chat=demo.chat(a.vehicle_id)
+  chat.messages.push({id:'1',role:'user',text:'вопрос',at:'2026-01-01'})
+  chat.draft.diagnosis='черновик';demo.save(a.vehicle_id,chat)
+  assert.equal(demo.chat(b.vehicle_id).messages.length,0)
+  assert.equal(demo.chat(a.vehicle_id).messages[0].text,'вопрос')
+  assert.equal(demo.chat(a.vehicle_id).draft.diagnosis,'черновик')
+  assert.equal(Object.keys(JSON.parse(values.get('digital-mechanic-demo-v1'))).length,2)
+})
+test('diagnosis uses selected vehicle fixture and rejects foreign check',async()=>{
+  const [a,b]=demo.vehicles;const result=await demo.diagnose(a,a.sessions[0].session_id)
+  assert.equal(result.session_id,a.sessions[0].session_id)
+  await assert.rejects(()=>demo.diagnose(a,b.sessions[0].session_id))
+})
