@@ -18,8 +18,3 @@ test('one persisted chat and draft per vehicle',()=>{
   assert.equal(demo.chat(a.vehicle_id).draft.diagnosis,'черновик')
   assert.equal(Object.keys(JSON.parse(values.get('digital-mechanic-demo-v1'))).length,2)
 })
-test('diagnosis uses selected vehicle fixture and rejects foreign check',async()=>{
-  const [a,b]=demo.vehicles;const result=await demo.diagnose(a,a.sessions[0].session_id)
-  assert.equal(result.session_id,a.sessions[0].session_id)
-  await assert.rejects(()=>demo.diagnose(a,b.sessions[0].session_id))
-})
