@@ -1,0 +1,6 @@
+{
+  "engine_id": "YAMZ_236M2",
+  "bundles": ["document_bundles/DOC-YAMZ-236M2-01/build_49b8834cdb655301c2e25050a6241c29ecffdf8d964e04ce22c4cc42898a87a1"],
+  "output": "engine_kbs",
+  "schema_version": "document-bundle-tables-v1"
+}
